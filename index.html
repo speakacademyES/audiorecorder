@@ -271,10 +271,6 @@
                 <label class="form-label" for="assignmentTitle">Assignment Title *</label>
                 <input type="text" id="assignmentTitle" class="form-input" placeholder="e.g., Spanish Oral Exam" required>
             </div>
-            <div class="form-group">
-                <label class="form-label" for="studentClass">Class/Subject</label>
-                <input type="text" id="studentClass" class="form-input" placeholder="e.g., Spanish 101">
-            </div>
         </form>
 
         <div class="recording-section">
@@ -599,7 +595,6 @@
         async function uploadToGoogleDrive() {
             const studentName = document.getElementById('studentName').value.trim();
             const assignmentTitle = document.getElementById('assignmentTitle').value.trim();
-            const studentClass = document.getElementById('studentClass').value.trim();
 
             // Validation
             if (!studentName || !assignmentTitle) {
@@ -652,7 +647,6 @@
                 params.append('audioData', base64Audio.split(',')[1]);
                 params.append('studentName', studentName);
                 params.append('assignmentTitle', assignmentTitle);
-                params.append('studentClass', studentClass);
                 params.append('timestamp', new Date().toISOString());
 
                 console.log('Sending form data...');
