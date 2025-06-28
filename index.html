@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Voice Recorder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .recorder-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .student-form {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .recording-section {
+            margin: 30px 0;
+        }
+
+        .record-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: #ff4757;
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.3);
+        }
+
+        .record-button:hover {
+            transform: scale(1.05);
+        }
+
+        .record-button.recording {
+            background: #ff3742;
+            animation: pulse 1.5s infinite;
+        }
+
+        .record-button.stopped {
+            background: #2ed573;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 71, 87, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+        }
+
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .audio-controls {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .control-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .control-button:hover {
+            background: #5a6fd8;
+        }
+
+        .upload-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .upload-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.3s;
+            width: 100%;
+        }
+
+        .upload-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .upload-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .waveform {
+            height: 60px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wave-bar {
+            width: 3px;
+            background: #667eea;
+            margin: 0 1px;
+            transition: height 0.1s;
+            border-radius: 2px;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            color: #666;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="recorder-container">
+        <div class="header">
+            <h1 class="title">🎤 Voice Recorder</h1>
+            <p class="subtitle">Record your assignment and upload to Google Drive</p>
+        </div>
+
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ol>
+                <li>Enter your name and assignment details</li>
+                <li>Click the red button to start recording</li>
+                <li>Click again to stop recording</li>
+                <li>Listen to your recording and upload when ready</li>
+            </ol>
+        </div>
+
+        <form class="student-form">
+            <div class="form-group">
+                <label class="form-label" for="studentName">Your Name *</label>
+                <input type="text" id="studentName" class="form-input" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="assignmentTitle">Assignment Title *</label>
+                <input type="text" id="assignmentTitle" class="form-input" placeholder="e.g., Spanish Oral Exam" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="studentClass">Class/Subject</label>
+                <input type="text" id="studentClass" class="form-input" placeholder="e.g., Spanish 101">
+            </div>
+        </form>
+
+        <div class="recording-section">
+            <button id="recordButton" class="record-button">
+                <span id="recordText">START</span>
+            </button>
+            <div id="timer" class="timer">00:00</div>
+            <div id="waveform" class="waveform"></div>
+        </div>
+
+        <div id="audioControls" class="audio-controls">
+            <button id="playButton" class="control-button">▶ Play</button>
+            <button id="pauseButton" class="control-button">⏸ Pause</button>
+            <button id="resetButton" class="control-button">🔄 Record Again</button>
+        </div>
+
+        <div id="uploadSection" class="upload-section">
+            <button id="uploadButton" class="upload-button">
+                📤 Upload to Google Drive
+            </button>
+        </div>
+
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <script>
+        // Configuration - Replace with your Google Apps Script Web App URL
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwasqrZkQEl2fKAdBnXTw-JKODoXA0rQq6rKmqb_h1zVPCKBCmFD2ORmi36lF5rDFIW/exec';
+
+        // Global variables
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordedBlob;
+        let audioElement;
+        let isRecording = false;
+        let startTime;
+        let timerInterval;
+        let animationId;
+
+        // DOM elements
+        const recordButton = document.getElementById('recordButton');
+        const recordText = document.getElementById('recordText');
+        const timer = document.getElementById('timer');
+        const audioControls = document.getElementById('audioControls');
+        const uploadSection = document.getElementById('uploadSection');
+        const uploadButton = document.getElementById('uploadButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const waveform = document.getElementById('waveform');
+        const playButton = document.getElementById('playButton');
+        const pauseButton = document.getElementById('pauseButton');
+        const resetButton = document.getElementById('resetButton');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', init);
+
+        async function init() {
+            console.log('Initializing audio recorder...');
+            try {
+                // Request microphone permission
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    } 
+                });
+                
+                console.log('Microphone access granted');
+                
+                // Stop the stream for now (we'll create a new one when recording)
+                stream.getTracks().forEach(track => track.stop());
+                
+                createWaveform();
+                showStatus('✅ Microphone ready! Click START to begin recording.', 'success');
+                recordButton.disabled = false;
+                
+            } catch (error) {
+                console.error('Microphone access error:', error);
+                let errorMessage = '❌ Cannot access microphone. ';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMessage += 'Please allow microphone permission and refresh the page.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage += 'No microphone found. Please connect a microphone.';
+                } else {
+                    errorMessage += 'Error: ' + error.message;
+                }
+                
+                showStatus(errorMessage, 'error');
+                recordButton.disabled = true;
+            }
+        }
+
+        function createWaveform() {
+            for (let i = 0; i < 50; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'wave-bar';
+                bar.style.height = '5px';
+                waveform.appendChild(bar);
+            }
+        }
+
+        function animateWaveform() {
+            const bars = waveform.querySelectorAll('.wave-bar');
+            bars.forEach(bar => {
+                const height = Math.random() * 40 + 5;
+                bar.style.height = height + 'px';
+            });
+            
+            if (isRecording) {
+                animationId = requestAnimationFrame(animateWaveform);
+            }
+        }
+
+        function resetWaveform() {
+            const bars = waveform.querySelectorAll('.wave-bar');
+            bars.forEach(bar => {
+                bar.style.height = '5px';
+            });
+        }
+
+        recordButton.addEventListener('click', async function(event) {
+            event.preventDefault();
+            console.log('Record button clicked, isRecording:', isRecording);
+            
+            // Disable button temporarily to prevent double-clicks
+            recordButton.disabled = true;
+            
+            try {
+                await toggleRecording();
+            } catch (error) {
+                console.error('Recording error:', error);
+                showStatus('❌ Recording error: ' + error.message, 'error');
+            } finally {
+                recordButton.disabled = false;
+            }
+        });
+
+        async function toggleRecording() {
+            if (!isRecording) {
+                await startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        async function startRecording() {
+            console.log('Starting recording...');
+            
+            try {
+                // Get fresh stream for recording
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    } 
+                });
+                
+                console.log('Got microphone stream');
+                
+                // Check if MediaRecorder is supported
+                if (!window.MediaRecorder) {
+                    throw new Error('MediaRecorder is not supported in this browser');
+                }
+                
+                // Create MediaRecorder with explicit options
+                const options = { mimeType: 'audio/webm' };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options.mimeType = 'audio/mp4';
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        options.mimeType = ''; // Use default
+                    }
+                }
+                
+                mediaRecorder = new MediaRecorder(stream, options);
+                console.log('MediaRecorder created with mimeType:', options.mimeType || 'default');
+                
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    console.log('Data available, size:', event.data.size);
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    console.log('MediaRecorder stopped, chunks:', audioChunks.length);
+                    recordedBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    console.log('Created blob, size:', recordedBlob.size);
+                    createAudioElement();
+                    showAudioControls();
+                };
+
+                mediaRecorder.onerror = (event) => {
+                    console.error('MediaRecorder error:', event.error);
+                    showStatus('❌ Recording error: ' + event.error, 'error');
+                };
+
+                mediaRecorder.start(1000); // Collect data every second
+                console.log('MediaRecorder started');
+                
+                isRecording = true;
+                startTime = Date.now();
+
+                // Update UI
+                recordButton.classList.add('recording');
+                recordText.textContent = 'STOP';
+                showStatus('🔴 Recording... Click STOP when finished.', 'info');
+
+                // Start timer and animation
+                startTimer();
+                animateWaveform();
+
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                showStatus('❌ Error starting recording: ' + error.message, 'error');
+                throw error;
+            }
+        }
+
+        function stopRecording() {
+            console.log('Stopping recording...');
+            
+            if (mediaRecorder && isRecording) {
+                try {
+                    mediaRecorder.stop();
+                    
+                    // Stop all tracks
+                    if (mediaRecorder.stream) {
+                        mediaRecorder.stream.getTracks().forEach(track => {
+                            console.log('Stopping track:', track.kind);
+                            track.stop();
+                        });
+                    }
+                    
+                    isRecording = false;
+
+                    // Update UI
+                    recordButton.classList.remove('recording');
+                    recordButton.classList.add('stopped');
+                    recordText.textContent = '✓ DONE';
+                    stopTimer();
+                    resetWaveform();
+                    showStatus('✅ Recording completed! You can now play it back or upload.', 'success');
+                    
+                    console.log('Recording stopped successfully');
+                } catch (error) {
+                    console.error('Error stopping recording:', error);
+                    showStatus('❌ Error stopping recording: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        function createAudioElement() {
+            if (audioElement) {
+                audioElement.remove();
+            }
+            audioElement = document.createElement('audio');
+            audioElement.src = URL.createObjectURL(recordedBlob);
+            audioElement.style.width = '100%';
+            audioElement.style.marginTop = '20px';
+            audioElement.controls = true;
+        }
+
+        function showAudioControls() {
+            audioControls.style.display = 'block';
+            uploadSection.style.display = 'block';
+        }
+
+        // Audio control events
+        playButton.addEventListener('click', () => {
+            if (audioElement) {
+                audioElement.play();
+            }
+        });
+
+        pauseButton.addEventListener('click', () => {
+            if (audioElement) {
+                audioElement.pause();
+            }
+        });
+
+        resetButton.addEventListener('click', () => {
+            // Reset everything
+            audioControls.style.display = 'none';
+            uploadSection.style.display = 'none';
+            recordButton.classList.remove('stopped');
+            recordText.textContent = 'START';
+            timer.textContent = '00:00';
+            recordedBlob = null;
+            if (audioElement) {
+                audioElement.remove();
+                audioElement = null;
+            }
+            resetWaveform();
+            showStatus('Ready to record again!', 'info');
+        });
+
+        // Upload functionality
+        uploadButton.addEventListener('click', uploadToGoogleDrive);
+
+        async function uploadToGoogleDrive() {
+            const studentName = document.getElementById('studentName').value.trim();
+            const assignmentTitle = document.getElementById('assignmentTitle').value.trim();
+            const studentClass = document.getElementById('studentClass').value.trim();
+
+            // Validation
+            if (!studentName || !assignmentTitle) {
+                showStatus('❌ Please fill in your name and assignment title before uploading.', 'error');
+                return;
+            }
+
+            if (!recordedBlob) {
+                showStatus('❌ No recording found. Please record audio first.', 'error');
+                return;
+            }
+
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+                showStatus('❌ Upload not configured. Please contact your teacher.', 'error');
+                return;
+            }
+
+            // Show uploading status
+            uploadButton.disabled = true;
+            uploadButton.textContent = '⏳ Uploading...';
+            showStatus('📤 Uploading your recording to Google Drive...', 'info');
+
+            try {
+                console.log('Starting upload to:', APPS_SCRIPT_URL);
+                
+                // First, test if the endpoint is reachable
+                const testResponse = await fetch(APPS_SCRIPT_URL, {
+                    method: 'GET'
+                });
+                
+                console.log('Test response status:', testResponse.status);
+                const testResult = await testResponse.text();
+                console.log('Test response:', testResult);
+                
+                // If test fails, show error
+                if (!testResponse.ok) {
+                    throw new Error('Cannot reach Google Apps Script. Status: ' + testResponse.status);
+                }
+                
+                // Convert blob to base64
+                const base64Audio = await blobToBase64(recordedBlob);
+                
+                // Create filename
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const filename = `${studentName}_${assignmentTitle}_${timestamp}.wav`;
+
+                // Create a simple URL-encoded form submission
+                const params = new URLSearchParams();
+                params.append('filename', filename);
+                params.append('audioData', base64Audio.split(',')[1]);
+                params.append('studentName', studentName);
+                params.append('assignmentTitle', assignmentTitle);
+                params.append('studentClass', studentClass);
+                params.append('timestamp', new Date().toISOString());
+
+                console.log('Sending form data...');
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: params.toString()
+                });
+
+                console.log('Upload response status:', response.status);
+                const responseText = await response.text();
+                console.log('Upload response:', responseText);
+
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.log('Response is not JSON:', responseText);
+                    // If response isn't JSON, assume success if status is OK
+                    if (response.ok) {
+                        result = { success: true };
+                    } else {
+                        throw new Error('Upload failed with non-JSON response');
+                    }
+                }
+
+                if (result.success) {
+                    showStatus('🎉 Recording uploaded successfully! Your teacher will receive it.', 'success');
+                    uploadButton.textContent = '✅ Uploaded!';
+                    
+                    setTimeout(() => {
+                        if (confirm('Upload successful! Would you like to record another assignment?')) {
+                            location.reload();
+                        }
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || 'Upload failed');
+                }
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                showStatus('❌ Upload failed: ' + error.message + '. Please check the console and try again.', 'error');
+                uploadButton.disabled = false;
+                uploadButton.textContent = '📤 Upload to Google Drive';
+            }
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+            
+            // Auto-hide info messages after 5 seconds
+            if (type === 'info') {
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
